@@ -1,36 +1,104 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 💰 Expense Tracker
+
+A modern, responsive expense management web application built with Next.js, Supabase, and shadcn/ui.
+
+## Features
+
+- 🔐 **Authentication** - Secure login and signup with Supabase
+- 💳 **Expense Management** - Add, edit, and delete expenses
+- 📊 **Dashboard** - View statistics and insights
+- 🔍 **Advanced Filtering** - Filter by category, date range, and search
+- 📱 **Responsive Design** - Works on mobile, tablet, and desktop
+- ✨ **Smooth Animations** - Minimalist design with elegant transitions
+
+## Tech Stack
+
+- **Framework**: Next.js 14+ with App Router
+- **Database & Auth**: Supabase
+- **UI Components**: shadcn/ui
+- **Styling**: Tailwind CSS
+- **Language**: TypeScript
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18+ installed
+- A Supabase account and project
+
+### Setup
+
+1. **Clone the repository** (if applicable) or navigate to the project directory:
+   ```bash
+   cd /Users/admin/Projects/expenses
+   ```
+
+2. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+
+3. **Configure Supabase**:
+   
+   a. Create a new project at [supabase.com](https://supabase.com)
+   
+   b. Run the database migration:
+      - Go to your Supabase project dashboard
+      - Navigate to SQL Editor
+      - Copy and paste the contents of `supabase/migrations/001_initial_schema.sql`
+      - Execute the SQL
+   
+   c. Update `.env.local` with your Supabase credentials:
+      ```env
+      NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+      NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_public_key
+      ```
+
+4. **Run the development server**:
+   ```bash
+   npm run dev
+   ```
+
+5. **Open your browser** and navigate to [http://localhost:3000](http://localhost:3000)
+
+## Usage
+
+1. **Sign up** for a new account or **log in** if you already have one
+2. **Add expenses** using the "Add Expense" button
+3. **Filter expenses** by category, date range, or search
+4. **Edit or delete** expenses using the action buttons in the table
+5. **View statistics** on the dashboard cards
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (auth)/          # Authentication pages
+│   ├── (dashboard)/     # Dashboard pages
+│   └── page.tsx         # Home page (redirects to dashboard)
+├── components/
+│   ├── dashboard/       # Dashboard components
+│   ├── expenses/        # Expense management components
+│   ├── layout/          # Layout components
+│   └── ui/              # shadcn/ui components
+└── lib/
+    ├── actions/         # Server actions
+    ├── supabase/        # Supabase clients
+    └── types/           # TypeScript types
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database Schema
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Categories Table
+- Default categories: Food & Dining, Transportation, Shopping, Entertainment, Bills & Utilities, Healthcare, Education, Travel, Other
+- Each category has an icon and color
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Expenses Table
+- Fields: amount, category, date, description
+- Row Level Security (RLS) enabled
+- Users can only access their own expenses
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
