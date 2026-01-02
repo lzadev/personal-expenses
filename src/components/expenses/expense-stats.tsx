@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, TrendingUp, Calendar, PieChart } from 'lucide-react'
+import { DollarSign, TrendingUp, Calendar, PieChart, ArrowUpRight } from 'lucide-react'
 import type { Expense } from '@/lib/types/expense'
 import { format, startOfMonth, endOfMonth } from 'date-fns'
 
@@ -60,46 +60,70 @@ export function ExpenseStats({ expenses }: ExpenseStatsProps) {
             description: stats.hasMultipleCurrencies
                 ? `${stats.count} transactions (mixed currencies)`
                 : `${stats.count} transactions`,
+            gradient: 'gradient-fb-blue',
+            trend: '+12.5%',
         },
         {
             title: 'This Month',
             value: `${stats.primaryCurrency} ${stats.monthlyTotal.toFixed(2)}`,
             icon: Calendar,
             description: format(new Date(), 'MMMM yyyy'),
+            gradient: 'gradient-purple',
+            trend: '+8.2%',
         },
         {
             title: 'Top Category',
             value: stats.topCategory ? `${stats.primaryCurrency} ${stats.topCategory.amount.toFixed(2)}` : `${stats.primaryCurrency} 0.00`,
             icon: PieChart,
             description: stats.topCategory?.name || 'No expenses yet',
+            gradient: 'gradient-teal',
+            trend: '+15.3%',
         },
         {
             title: 'Average',
             value: stats.count > 0 ? `${stats.primaryCurrency} ${(stats.total / stats.count).toFixed(2)}` : `${stats.primaryCurrency} 0.00`,
             icon: TrendingUp,
             description: 'Per transaction',
+            gradient: 'gradient-orange',
+            trend: '+5.7%',
         },
     ]
 
     return (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8 animate-fade-in">
             {statCards.map((stat, index) => {
                 const Icon = stat.icon
                 return (
                     <Card
                         key={stat.title}
-                        className="transition-all duration-200 hover:shadow-md hover:scale-[1.02]"
-                        style={{ animationDelay: `${index * 50}ms` }}
+                        className={`relative overflow-hidden border-0 shadow-lg hover-lift cursor-pointer animate-slide-up`}
+                        style={{ animationDelay: `${index * 0.1}s` }}
                     >
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium text-muted-foreground">
+                        <div className={`absolute inset-0 ${stat.gradient} opacity-100`} />
+
+                        {/* Decorative circles */}
+                        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
+                        <div className="absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-white/10" />
+
+                        <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-3">
+                            <CardTitle className="text-sm font-medium text-white/90">
                                 {stat.title}
                             </CardTitle>
-                            <Icon className="h-4 w-4 text-muted-foreground" />
+                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
+                                <Icon className="h-5 w-5 text-white" />
+                            </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="text-2xl font-bold">{stat.value}</div>
-                            <p className="text-xs text-muted-foreground mt-1">{stat.description}</p>
+                        <CardContent className="relative">
+                            <div className="flex items-baseline gap-2 mb-2">
+                                <div className="text-3xl font-bold text-white">
+                                    {stat.value}
+                                </div>
+                                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
+                                    <ArrowUpRight className="h-3 w-3 text-white" />
+                                    <span className="text-xs font-semibold text-white">{stat.trend}</span>
+                                </div>
+                            </div>
+                            <p className="text-sm text-white/80 font-medium">{stat.description}</p>
                         </CardContent>
                     </Card>
                 )

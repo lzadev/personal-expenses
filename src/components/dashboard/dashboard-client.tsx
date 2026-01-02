@@ -34,33 +34,37 @@ export function DashboardClient({ initialExpenses, categories }: DashboardClient
     })
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8 pb-8">
             <ExpenseStats expenses={filteredExpenses} />
 
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Expenses</h2>
-                    <p className="text-muted-foreground">
-                        Manage and track your expenses
-                    </p>
+            <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                            Expenses
+                        </h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5 font-medium">
+                            Manage and track all your expenses
+                        </p>
+                    </div>
+                    <AddExpenseDialog
+                        categories={categories}
+                        editingExpense={editingExpense}
+                        onClose={() => setEditingExpense(null)}
+                    />
                 </div>
-                <AddExpenseDialog
+
+                <ExpenseFilters
                     categories={categories}
-                    editingExpense={editingExpense}
-                    onClose={() => setEditingExpense(null)}
+                    filter={filter}
+                    onFilterChange={setFilter}
+                />
+
+                <ExpenseTable
+                    expenses={filteredExpenses}
+                    onEdit={setEditingExpense}
                 />
             </div>
-
-            <ExpenseFilters
-                categories={categories}
-                filter={filter}
-                onFilterChange={setFilter}
-            />
-
-            <ExpenseTable
-                expenses={filteredExpenses}
-                onEdit={setEditingExpense}
-            />
         </div>
     )
 }

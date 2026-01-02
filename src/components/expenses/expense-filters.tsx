@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Filter, X } from 'lucide-react'
+import { Search, Filter, X, Calendar as CalendarIcon } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import {
@@ -60,25 +60,27 @@ export function ExpenseFilters({ categories, filter, onFilterChange }: ExpenseFi
     const hasActiveFilters = filter.categoryId || filter.search || filter.startDate || filter.endDate
 
     return (
-        <div className="flex flex-col sm:flex-row gap-3 animate-slide-up">
+        <div className="flex flex-col sm:flex-row gap-3 p-4 bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+            {/* Search Input */}
             <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                     placeholder="Search expenses..."
                     value={filter.search || ''}
                     onChange={(e) => handleSearchChange(e.target.value)}
-                    className="pl-9 transition-all duration-200 focus:scale-[1.01]"
+                    className="pl-10 h-11 bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 focus-visible:ring-[#1877F2] focus-visible:border-[#1877F2] rounded-xl font-medium transition-all"
                 />
             </div>
 
+            {/* Category Select */}
             <Select value={filter.categoryId || 'all'} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="w-full sm:w-[200px] transition-all duration-200">
+                <SelectTrigger className="w-full sm:w-[200px] h-11 bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-[#3A3B3C] transition-all">
                     <SelectValue placeholder="All categories" />
                 </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="all">All categories</SelectItem>
+                <SelectContent className="rounded-xl">
+                    <SelectItem value="all" className="rounded-lg">All categories</SelectItem>
                     {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
+                        <SelectItem key={category.id} value={category.id} className="rounded-lg">
                             <div className="flex items-center gap-2">
                                 {category.icon && <span>{category.icon}</span>}
                                 <span>{category.name}</span>
@@ -88,10 +90,15 @@ export function ExpenseFilters({ categories, filter, onFilterChange }: ExpenseFi
                 </SelectContent>
             </Select>
 
+            {/* Date Range Picker */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="w-full sm:w-auto transition-all duration-200">
-                        <Filter className="h-4 w-4 mr-2" />
+                    <Button
+                        variant="outline"
+                        className={`w-full sm:w-auto h-11 px-4 bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-[#3A3B3C] rounded-xl font-medium transition-all ${dateRange.from ? 'border-[#1877F2] bg-blue-50 dark:bg-blue-950/30 text-[#1877F2]' : ''
+                            }`}
+                    >
+                        <CalendarIcon className="h-4 w-4 mr-2" />
                         {dateRange.from ? (
                             dateRange.to ? (
                                 <>
@@ -105,22 +112,23 @@ export function ExpenseFilters({ categories, filter, onFilterChange }: ExpenseFi
                         )}
                     </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-auto p-0">
+                <DropdownMenuContent align="end" className="w-auto p-0 rounded-2xl">
                     <Calendar
                         mode="range"
                         selected={dateRange as any}
                         onSelect={(range) => handleDateRangeSelect(range || {})}
                         numberOfMonths={2}
-                        className="rounded-md"
+                        className="rounded-2xl"
                     />
                 </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Clear Filters Button */}
             {hasActiveFilters && (
                 <Button
                     variant="ghost"
                     onClick={clearFilters}
-                    className="w-full sm:w-auto transition-all duration-200 hover:bg-destructive/10"
+                    className="w-full sm:w-auto h-11 px-4 text-gray-600 dark:text-gray-400 hover:text-[#F02849] hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl font-medium transition-all animate-scale-in"
                 >
                     <X className="h-4 w-4 mr-2" />
                     Clear

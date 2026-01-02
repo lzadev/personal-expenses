@@ -100,23 +100,32 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <Button className="transition-all duration-200 hover:scale-[1.02]">
-                    <Plus className="h-4 w-4 mr-2" />
+                <Button className="gradient-fb-blue hover:opacity-90 text-white shadow-lg hover:shadow-xl transition-all duration-200 hover-lift rounded-xl h-11 px-6 font-semibold">
+                    <Plus className="h-5 w-5 mr-2" />
                     Add Expense
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] animate-scale-in">
-                <DialogHeader>
-                    <DialogTitle>{editingExpense ? 'Edit Expense' : 'Add New Expense'}</DialogTitle>
-                    <DialogDescription>
-                        {editingExpense ? 'Update the expense details below.' : 'Enter the details of your expense.'}
-                    </DialogDescription>
+            <DialogContent className="sm:max-w-[500px] animate-scale-in glass-card border-gray-200 dark:border-gray-700">
+                <DialogHeader className="space-y-3">
+                    <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-xl gradient-fb-blue flex items-center justify-center shadow-lg">
+                            <Plus className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                            <DialogTitle className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                {editingExpense ? 'Edit Expense' : 'Add New Expense'}
+                            </DialogTitle>
+                            <DialogDescription className="text-gray-500 dark:text-gray-400">
+                                {editingExpense ? 'Update the expense details below.' : 'Enter the details of your expense.'}
+                            </DialogDescription>
+                        </div>
+                    </div>
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
-                    <div className="grid gap-4 py-4">
+                    <div className="grid gap-5 py-6">
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="amount">Amount</Label>
+                            <div className="grid gap-2.5">
+                                <Label htmlFor="amount" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Amount</Label>
                                 <Input
                                     id="amount"
                                     type="number"
@@ -126,17 +135,17 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
                                     value={formData.amount || ''}
                                     onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
                                     required
-                                    className="transition-all duration-200 focus:scale-[1.01]"
+                                    className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 focus-visible:ring-[#1877F2] transition-all"
                                 />
                             </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="currency">Currency</Label>
+                            <div className="grid gap-2.5">
+                                <Label htmlFor="currency" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Currency</Label>
                                 <Select
                                     value={formData.currency}
                                     onValueChange={(value) => setFormData({ ...formData, currency: value })}
                                     required
                                 >
-                                    <SelectTrigger id="currency" className="transition-all duration-200">
+                                    <SelectTrigger id="currency" className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700">
                                         <SelectValue placeholder="Select currency" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -154,14 +163,14 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
                                 </Select>
                             </div>
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="category">Category</Label>
+                        <div className="grid gap-2.5">
+                            <Label htmlFor="category" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Category</Label>
                             <Select
                                 value={formData.category_id}
                                 onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                                 required
                             >
-                                <SelectTrigger id="category" className="transition-all duration-200">
+                                <SelectTrigger id="category" className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700">
                                     <SelectValue placeholder="Select a category" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -176,31 +185,31 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
                                 </SelectContent>
                             </Select>
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="date">Date</Label>
+                        <div className="grid gap-2.5">
+                            <Label htmlFor="date" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Date</Label>
                             <Input
                                 id="date"
                                 type="date"
                                 value={formData.date}
                                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                                 required
-                                className="transition-all duration-200 focus:scale-[1.01]"
+                                className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 focus-visible:ring-[#1877F2] transition-all"
                             />
                         </div>
-                        <div className="grid gap-2">
-                            <Label htmlFor="description">Description (optional)</Label>
+                        <div className="grid gap-2.5">
+                            <Label htmlFor="description" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description (optional)</Label>
                             <Input
                                 id="description"
                                 placeholder="What was this expense for?"
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                className="transition-all duration-200 focus:scale-[1.01]"
+                                className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 focus-visible:ring-[#1877F2] transition-all"
                             />
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button type="submit" disabled={loading} className="transition-all duration-200 hover:scale-[1.02]">
-                            {loading ? 'Saving...' : editingExpense ? 'Update' : 'Add Expense'}
+                    <DialogFooter className="gap-3">
+                        <Button type="submit" disabled={loading} className="gradient-fb-blue hover:opacity-90 text-white h-11 px-6 rounded-xl font-semibold transition-all hover-lift">
+                            {loading ? 'Saving...' : editingExpense ? 'Update Expense' : 'Add Expense'}
                         </Button>
                     </DialogFooter>
                 </form>
