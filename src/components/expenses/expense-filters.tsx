@@ -74,13 +74,18 @@ export function ExpenseFilters({ categories, filter, onFilterChange }: ExpenseFi
 
             {/* Category Select */}
             <Select value={filter.categoryId || 'all'} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="w-full sm:w-[200px] h-11 bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-[#3A3B3C] transition-all">
+                <SelectTrigger className="w-full sm:w-[200px] !h-11 bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 rounded-xl font-medium hover:bg-gray-100 dark:hover:bg-[#3A3B3C] transition-all">
                     <SelectValue placeholder="All categories" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
-                    <SelectItem value="all" className="rounded-lg">All categories</SelectItem>
+                    <SelectItem value="all">
+                        <div className="flex items-center gap-2">
+                            <Filter className="h-4 w-4" />
+                            <span>All categories</span>
+                        </div>
+                    </SelectItem>
                     {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id} className="rounded-lg">
+                        <SelectItem key={category.id} value={category.id}>
                             <div className="flex items-center gap-2">
                                 {category.icon && <span>{category.icon}</span>}
                                 <span>{category.name}</span>

@@ -126,37 +126,35 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
                 </DialogHeader>
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-5 py-6">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="grid gap-2.5">
-                                <Label htmlFor="amount" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Amount</Label>
-                                <Input
-                                    id="amount"
-                                    type="number"
-                                    step="0.01"
-                                    min="0"
-                                    placeholder="0.00"
-                                    value={formData.amount || ''}
-                                    onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
-                                    required
-                                    className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 focus-visible:ring-[#1877F2] transition-all"
-                                />
-                            </div>
-                            <div className="grid gap-2.5">
-                                <Label htmlFor="currency" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Currency</Label>
-                                <Select
-                                    value={formData.currency}
-                                    onValueChange={(value) => setFormData({ ...formData, currency: value })}
-                                    required
-                                >
-                                    <SelectTrigger id="currency" className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700">
-                                        <SelectValue placeholder="Select currency" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="DOP">DOP ($)</SelectItem>
-                                        <SelectItem value="USD">USD ($)</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                        <div className="grid gap-2.5">
+                            <Label htmlFor="amount" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Amount</Label>
+                            <Input
+                                id="amount"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="0.00"
+                                value={formData.amount || ''}
+                                onChange={(e) => setFormData({ ...formData, amount: parseFloat(e.target.value) || 0 })}
+                                required
+                                className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 focus-visible:ring-[#1877F2] transition-all"
+                            />
+                        </div>
+                        <div className="grid gap-2.5">
+                            <Label htmlFor="currency" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Currency</Label>
+                            <Select
+                                value={formData.currency}
+                                onValueChange={(value) => setFormData({ ...formData, currency: value })}
+                                required
+                            >
+                                <SelectTrigger id="currency" className="w-full !h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700">
+                                    <SelectValue placeholder="Select currency" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="DOP">DOP ($)</SelectItem>
+                                    <SelectItem value="USD">USD ($)</SelectItem>
+                                </SelectContent>
+                            </Select>
                         </div>
                         <div className="grid gap-2.5">
                             <Label htmlFor="category" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Category</Label>
@@ -165,16 +163,16 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
                                 onValueChange={(value) => setFormData({ ...formData, category_id: value })}
                                 required
                             >
-                                <SelectTrigger id="category" className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700">
+                                <SelectTrigger id="category" className="w-full !h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700">
                                     <SelectValue placeholder="Select a category" />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {categories.map((category) => (
                                         <SelectItem key={category.id} value={category.id}>
-                                            <div className="flex items-center gap-2">
+                                            <span className="flex items-center gap-2">
                                                 {category.icon && <span>{category.icon}</span>}
                                                 <span>{category.name}</span>
-                                            </div>
+                                            </span>
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -195,6 +193,7 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
                             <Label htmlFor="description" className="text-sm font-semibold text-gray-700 dark:text-gray-300">Description (optional)</Label>
                             <Input
                                 id="description"
+                                type="text"
                                 placeholder="What was this expense for?"
                                 value={formData.description}
                                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
