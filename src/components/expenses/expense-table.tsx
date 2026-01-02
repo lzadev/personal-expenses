@@ -126,7 +126,7 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
             {/* Table Header */}
             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
                 <div className="flex items-center justify-between">
-                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Latest Expenses</h3>
+                    {/* <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Latest Expenses</h3> */}
                     <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">
                         {sortedExpenses.length} total
                     </span>
@@ -242,8 +242,8 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                                         size="sm"
                                         onClick={() => setCurrentPage(page as number)}
                                         className={`h-9 w-9 p-0 ${currentPage === page
-                                                ? 'gradient-fb-blue text-white hover:opacity-90'
-                                                : 'border-gray-200 dark:border-gray-700'
+                                            ? 'gradient-fb-blue text-white hover:opacity-90'
+                                            : 'border-gray-200 dark:border-gray-700'
                                             }`}
                                     >
                                         {page}

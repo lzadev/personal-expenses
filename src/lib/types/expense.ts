@@ -21,6 +21,7 @@ export interface Expense {
 
 export interface ExpenseFilter {
   categoryId?: string
+  currency?: string
   startDate?: string
   endDate?: string
   search?: string

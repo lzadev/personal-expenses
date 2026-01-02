@@ -20,6 +20,10 @@ export async function getExpenses(filter?: ExpenseFilter) {
     query = query.eq('category_id', filter.categoryId)
   }
 
+  if (filter?.currency) {
+    query = query.eq('currency', filter.currency)
+  }
+
   if (filter?.startDate) {
     query = query.gte('date', filter.startDate)
   }
