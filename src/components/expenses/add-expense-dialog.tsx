@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Plus } from 'lucide-react'
+import { toast } from 'sonner'
 import {
     Dialog,
     DialogContent,
@@ -36,7 +37,7 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
     const [loading, setLoading] = useState(false)
     const [formData, setFormData] = useState<ExpenseFormData>({
         amount: 0,
-        currency: 'USD',
+        currency: 'DOP',
         category_id: '',
         date: format(new Date(), 'yyyy-MM-dd'),
         description: '',
@@ -62,14 +63,16 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
         try {
             if (editingExpense) {
                 await updateExpense(editingExpense.id, formData)
+                toast.success('Expense updated successfully!')
             } else {
                 await createExpense(formData)
+                toast.success('Expense added successfully!')
             }
 
             setOpen(false)
             setFormData({
                 amount: 0,
-                currency: 'USD',
+                currency: 'DOP',
                 category_id: '',
                 date: format(new Date(), 'yyyy-MM-dd'),
                 description: '',
@@ -77,7 +80,7 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
             onClose?.()
         } catch (error) {
             console.error('Failed to save expense:', error)
-            alert('Failed to save expense')
+            toast.error('Failed to save expense. Please try again.')
         } finally {
             setLoading(false)
         }
@@ -149,16 +152,8 @@ export function AddExpenseDialog({ categories, editingExpense, onClose }: AddExp
                                         <SelectValue placeholder="Select currency" />
                                     </SelectTrigger>
                                     <SelectContent>
+                                        <SelectItem value="DOP">DOP ($)</SelectItem>
                                         <SelectItem value="USD">USD ($)</SelectItem>
-                                        <SelectItem value="EUR">EUR (€)</SelectItem>
-                                        <SelectItem value="GBP">GBP (£)</SelectItem>
-                                        <SelectItem value="JPY">JPY (¥)</SelectItem>
-                                        <SelectItem value="CAD">CAD ($)</SelectItem>
-                                        <SelectItem value="AUD">AUD ($)</SelectItem>
-                                        <SelectItem value="CHF">CHF (Fr)</SelectItem>
-                                        <SelectItem value="CNY">CNY (¥)</SelectItem>
-                                        <SelectItem value="INR">INR (₹)</SelectItem>
-                                        <SelectItem value="MXN">MXN ($)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

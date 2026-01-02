@@ -3,7 +3,18 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import type { Expense } from '@/lib/types/expense'
 import { deleteExpense } from '@/lib/actions/expenses'
 import { formatCurrency } from '@/lib/utils/currency'
@@ -18,19 +29,32 @@ const ITEMS_PER_PAGE = 20
 export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
     const [deletingId, setDeletingId] = useState<string | null>(null)
     const [currentPage, setCurrentPage] = useState(1)
+    const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null)
 
-    const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this expense?')) return
+    const handleDeleteClick = (expense: Expense) => {
+        setExpenseToDelete(expense)
+    }
 
-        setDeletingId(id)
-        try {
-            await deleteExpense(id)
-        } catch (error) {
-            console.error('Failed to delete expense:', error)
-            alert('Failed to delete expense')
-        } finally {
-            setDeletingId(null)
-        }
+    const handleConfirmDelete = async () => {
+        if (!expenseToDelete) return
+
+        setDeletingId(expenseToDelete.id)
+        setExpenseToDelete(null)
+
+        toast.promise(
+            deleteExpense(expenseToDelete.id),
+            {
+                loading: 'Deleting expense...',
+                success: () => {
+                    setDeletingId(null)
+                    return `Deleted ${formatCurrency(expenseToDelete.amount, expenseToDelete.currency)} expense`
+                },
+                error: (err) => {
+                    setDeletingId(null)
+                    return 'Failed to delete expense'
+                },
+            }
+        )
     }
 
     // Sort expenses by date (newest first)
@@ -173,7 +197,7 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                                         <Button
                                             variant="ghost"
                                             size="sm"
-                                            onClick={() => handleDelete(expense.id)}
+                                            onClick={() => handleDeleteClick(expense)}
                                             disabled={deletingId === expense.id}
                                             className="h-8 w-8 p-0 hover:bg-red-50 hover:text-[#F02849] dark:hover:bg-red-950/30 dark:hover:text-red-400"
                                         >
@@ -218,8 +242,8 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                                         size="sm"
                                         onClick={() => setCurrentPage(page as number)}
                                         className={`h-9 w-9 p-0 ${currentPage === page
-                                            ? 'gradient-fb-blue text-white hover:opacity-90'
-                                            : 'border-gray-200 dark:border-gray-700'
+                                                ? 'gradient-fb-blue text-white hover:opacity-90'
+                                                : 'border-gray-200 dark:border-gray-700'
                                             }`}
                                     >
                                         {page}
@@ -241,6 +265,31 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                     )}
                 </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={!!expenseToDelete} onOpenChange={(open) => !open && setExpenseToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Expense?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to delete this expense of{' '}
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
+                                {expenseToDelete && formatCurrency(expenseToDelete.amount, expenseToDelete.currency)}
+                            </span>
+                            ? This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={handleConfirmDelete}
+                            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+                        >
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }
