@@ -139,7 +139,7 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                             >
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="text-sm text-gray-900 dark:text-gray-100 font-medium">
-                                        {format(new Date(expense.date), 'd MMM yyyy')}
+                                        {format(new Date(expense.date + 'T00:00:00'), 'd MMM yyyy')}
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
@@ -161,7 +161,7 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                                     </div>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right">
-                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center justify-end gap-2">
                                         <Button
                                             variant="ghost"
                                             size="sm"
@@ -188,13 +188,13 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
             </div>
 
             {/* Pagination Footer */}
-            {totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800">
-                    <div className="flex items-center justify-between">
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                            Showing {startIndex + 1} to {Math.min(endIndex, sortedExpenses.length)} of {sortedExpenses.length} expenses
-                        </div>
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                        Showing {startIndex + 1} to {Math.min(endIndex, sortedExpenses.length)} of {sortedExpenses.length} expenses
+                    </div>
 
+                    {totalPages > 1 && (
                         <div className="flex items-center gap-1">
                             {/* Previous Button */}
                             <Button
@@ -238,9 +238,9 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
                         </div>
-                    </div>
+                    )}
                 </div>
-            )}
+            </div>
         </>
     )
 }

@@ -19,7 +19,7 @@ export function ExpenseStats({ expenses }: ExpenseStatsProps) {
         const currentMonth = new Date().getMonth()
         const currentYear = new Date().getFullYear()
         const monthlyExpenses = expenses.filter(expense => {
-            const expenseDate = new Date(expense.date)
+            const expenseDate = new Date(expense.date + 'T00:00:00')
             return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear
         })
         const monthlyTotal = monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0)
