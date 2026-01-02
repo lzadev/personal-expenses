@@ -12,43 +12,47 @@ interface ExpenseStatsProps {
 
 export function ExpenseStats({ expenses }: ExpenseStatsProps) {
     const stats = useMemo(() => {
-        const total = expenses.reduce((sum, exp) => sum + exp.amount, 0)
+        const total = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+        const count = expenses.length
 
-        // Detect primary currency (most common)
-        const currencyCounts = expenses.reduce((acc, exp) => {
-            acc[exp.currency] = (acc[exp.currency] || 0) + 1
+        // Get current month expenses
+        const currentMonth = new Date().getMonth()
+        const currentYear = new Date().getFullYear()
+        const monthlyExpenses = expenses.filter(expense => {
+            const expenseDate = new Date(expense.date)
+            return expenseDate.getMonth() === currentMonth && expenseDate.getFullYear() === currentYear
+        })
+        const monthlyTotal = monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0)
+
+        // Get top category
+        const categoryTotals = expenses.reduce((acc, expense) => {
+            const categoryName = expense.category?.name || 'Uncategorized'
+            acc[categoryName] = (acc[categoryName] || 0) + expense.amount
+            return acc
+        }, {} as Record<string, number>)
+
+        const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]
+
+        // Calculate average
+        const average = count > 0 ? total / count : 0
+
+        // Determine primary currency (most common)
+        const currencyCounts = expenses.reduce((acc, expense) => {
+            acc[expense.currency] = (acc[expense.currency] || 0) + 1
             return acc
         }, {} as Record<string, number>)
 
         const primaryCurrency = Object.entries(currencyCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'USD'
         const hasMultipleCurrencies = Object.keys(currencyCounts).length > 1
 
-        const now = new Date()
-        const monthStart = startOfMonth(now)
-        const monthEnd = endOfMonth(now)
-
-        const monthlyExpenses = expenses.filter(exp => {
-            const expDate = new Date(exp.date)
-            return expDate >= monthStart && expDate <= monthEnd
-        })
-
-        const monthlyTotal = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0)
-
-        const categoryTotals = expenses.reduce((acc, exp) => {
-            const categoryName = exp.category?.name || 'Uncategorized'
-            acc[categoryName] = (acc[categoryName] || 0) + exp.amount
-            return acc
-        }, {} as Record<string, number>)
-
-        const topCategory = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1])[0]
-
         return {
             total,
+            count,
             monthlyTotal,
-            count: expenses.length,
+            topCategory: topCategory ? { name: topCategory[0], amount: topCategory[1] } : null,
+            average,
             primaryCurrency,
             hasMultipleCurrencies,
-            topCategory: topCategory ? { name: topCategory[0], amount: topCategory[1] } : null,
         }
     }, [expenses])
 
@@ -67,13 +71,15 @@ export function ExpenseStats({ expenses }: ExpenseStatsProps) {
             title: 'This Month',
             value: `${stats.primaryCurrency} ${stats.monthlyTotal.toFixed(2)}`,
             icon: Calendar,
-            description: format(new Date(), 'MMMM yyyy'),
+            description: new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
             gradient: 'gradient-purple',
             trend: '+8.2%',
         },
         {
             title: 'Top Category',
-            value: stats.topCategory ? `${stats.primaryCurrency} ${stats.topCategory.amount.toFixed(2)}` : `${stats.primaryCurrency} 0.00`,
+            value: stats.topCategory
+                ? `${stats.primaryCurrency} ${stats.topCategory.amount.toFixed(2)}`
+                : 'N/A',
             icon: PieChart,
             description: stats.topCategory?.name || 'No expenses yet',
             gradient: 'gradient-teal',
@@ -81,7 +87,7 @@ export function ExpenseStats({ expenses }: ExpenseStatsProps) {
         },
         {
             title: 'Average',
-            value: stats.count > 0 ? `${stats.primaryCurrency} ${(stats.total / stats.count).toFixed(2)}` : `${stats.primaryCurrency} 0.00`,
+            value: `${stats.primaryCurrency} ${stats.average.toFixed(2)}`,
             icon: TrendingUp,
             description: 'Per transaction',
             gradient: 'gradient-orange',
@@ -90,40 +96,40 @@ export function ExpenseStats({ expenses }: ExpenseStatsProps) {
     ]
 
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8 animate-fade-in">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6 animate-fade-in">
             {statCards.map((stat, index) => {
                 const Icon = stat.icon
                 return (
                     <Card
                         key={stat.title}
-                        className={`relative overflow-hidden border-0 shadow-lg hover-lift cursor-pointer animate-slide-up`}
+                        className={`relative overflow-hidden border-0 shadow-md hover-lift cursor-pointer animate-slide-up`}
                         style={{ animationDelay: `${index * 0.1}s` }}
                     >
                         <div className={`absolute inset-0 ${stat.gradient} opacity-100`} />
 
                         {/* Decorative circles */}
-                        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10" />
-                        <div className="absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-white/10" />
+                        <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
+                        <div className="absolute -right-3 -bottom-3 h-20 w-20 rounded-full bg-white/10" />
 
-                        <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-3">
-                            <CardTitle className="text-sm font-medium text-white/90">
+                        <CardHeader className="relative flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-xs font-medium text-white/90">
                                 {stat.title}
                             </CardTitle>
-                            <div className="p-2.5 rounded-xl bg-white/20 backdrop-blur-sm shadow-lg">
-                                <Icon className="h-5 w-5 text-white" />
+                            <div className="p-1.5 rounded-lg bg-white/20 backdrop-blur-sm shadow-md">
+                                <Icon className="h-4 w-4 text-white" />
                             </div>
                         </CardHeader>
-                        <CardContent className="relative">
-                            <div className="flex items-baseline gap-2 mb-2">
-                                <div className="text-3xl font-bold text-white">
+                        <CardContent className="relative pb-3">
+                            <div className="flex items-baseline gap-2 mb-1">
+                                <div className="text-xl font-bold text-white">
                                     {stat.value}
                                 </div>
-                                <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
-                                    <ArrowUpRight className="h-3 w-3 text-white" />
-                                    <span className="text-xs font-semibold text-white">{stat.trend}</span>
+                                <div className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/20 backdrop-blur-sm">
+                                    <ArrowUpRight className="h-2.5 w-2.5 text-white" />
+                                    <span className="text-[10px] font-semibold text-white">{stat.trend}</span>
                                 </div>
                             </div>
-                            <p className="text-sm text-white/80 font-medium">{stat.description}</p>
+                            <p className="text-xs text-white/80 font-medium">{stat.description}</p>
                         </CardContent>
                     </Card>
                 )

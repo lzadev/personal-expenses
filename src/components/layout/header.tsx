@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { LogOut, Menu, User, Bell, Search } from 'lucide-react'
+import { LogOut, Menu, User, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
     DropdownMenu,
@@ -36,18 +36,6 @@ export function Header() {
                                 Expense Tracker
                             </h1>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Manage your finances</p>
-                        </div>
-                    </div>
-
-                    {/* Search Bar - Desktop */}
-                    <div className="hidden md:flex flex-1 max-w-md mx-4">
-                        <div className="relative w-full">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search expenses..."
-                                className="w-full h-10 pl-10 pr-4 rounded-full bg-gray-100 dark:bg-[#3A3B3C] border-0 text-sm focus:outline-none focus:ring-2 focus:ring-[#1877F2] transition-all"
-                            />
                         </div>
                     </div>
 
