@@ -1,24 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { Pencil, Trash2 } from 'lucide-react'
-import {
-    useReactTable,
-    getCoreRowModel,
-    getSortedRowModel,
-    flexRender,
-    type ColumnDef,
-    type SortingState,
-} from '@tanstack/react-table'
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import type { Expense } from '@/lib/types/expense'
 import { deleteExpense } from '@/lib/actions/expenses'
@@ -31,9 +15,6 @@ interface ExpenseTableProps {
 
 export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
     const [deletingId, setDeletingId] = useState<string | null>(null)
-    const [sorting, setSorting] = useState<SortingState>([
-        { id: 'date', desc: true }
-    ])
 
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this expense?')) return
@@ -49,161 +30,120 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
         }
     }
 
-    const columns = useMemo<ColumnDef<Expense>[]>(
-        () => [
-            {
-                accessorKey: 'date',
-                header: () => <div className="font-semibold text-gray-900 dark:text-gray-100">Date</div>,
-                cell: ({ row }) => (
-                    <div className="font-semibold text-gray-900 dark:text-gray-100">
-                        {format(new Date(row.getValue('date')), 'MMM dd, yyyy')}
-                    </div>
-                ),
-                sortingFn: 'datetime',
-            },
-            {
-                accessorKey: 'category',
-                header: () => <div className="font-semibold text-gray-900 dark:text-gray-100">Category</div>,
-                cell: ({ row }) => {
-                    const expense = row.original
-                    return (
-                        <div className="flex items-center gap-2">
-                            {expense.category?.icon && (
-                                <span className="text-xl">{expense.category.icon}</span>
-                            )}
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
-                                {expense.category?.name || 'Uncategorized'}
-                            </span>
-                        </div>
-                    )
-                },
-                sortingFn: (rowA, rowB) => {
-                    const a = rowA.original.category?.name || 'Uncategorized'
-                    const b = rowB.original.category?.name || 'Uncategorized'
-                    return a.localeCompare(b)
-                },
-            },
-            {
-                accessorKey: 'description',
-                header: () => <div className="font-semibold text-gray-900 dark:text-gray-100">Description</div>,
-                cell: ({ row }) => (
-                    <div className="max-w-md text-gray-600 dark:text-gray-400 font-medium">
-                        {row.getValue('description') || '—'}
-                    </div>
-                ),
-            },
-            {
-                accessorKey: 'amount',
-                header: () => <div className="font-semibold text-right text-gray-900 dark:text-gray-100">Amount</div>,
-                cell: ({ row }) => {
-                    const expense = row.original
-                    return (
-                        <div className="text-right">
-                            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                                {formatCurrency(expense.amount, expense.currency)}
-                            </span>
-                        </div>
-                    )
-                },
-                sortingFn: 'basic',
-            },
-            {
-                id: 'actions',
-                header: () => <div className="text-right font-semibold text-gray-900 dark:text-gray-100">Actions</div>,
-                cell: ({ row }) => {
-                    const expense = row.original
-                    return (
-                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => onEdit(expense)}
-                                className="h-9 w-9 p-0 rounded-lg hover:bg-blue-50 hover:text-[#1877F2] dark:hover:bg-blue-950/30 dark:hover:text-blue-400 transition-all duration-200"
-                            >
-                                <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDelete(expense.id)}
-                                disabled={deletingId === expense.id}
-                                className="h-9 w-9 p-0 rounded-lg hover:bg-red-50 hover:text-[#F02849] dark:hover:bg-red-950/30 dark:hover:text-red-400 transition-all duration-200"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
-                        </div>
-                    )
-                },
-            },
-        ],
-        [deletingId, onEdit]
+    // Sort expenses by date (newest first)
+    const sortedExpenses = [...expenses].sort((a, b) =>
+        new Date(b.date).getTime() - new Date(a.date).getTime()
     )
-
-    const table = useReactTable({
-        data: expenses,
-        columns,
-        state: {
-            sorting,
-        },
-        onSortingChange: setSorting,
-        getCoreRowModel: getCoreRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-    })
 
     if (expenses.length === 0) {
         return (
-            <div className="text-center py-16 bg-white dark:bg-[#242526] rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 animate-fade-in">
+            <div className="bg-white dark:bg-[#242526] rounded-xl p-12 text-center animate-fade-in">
                 <div className="flex justify-center mb-4">
-                    <div className="h-16 w-16 rounded-full gradient-fb-blue flex items-center justify-center">
+                    <div className="h-16 w-16 rounded-full gradient-fb-blue flex items-center justify-center shadow-lg">
                         <span className="text-3xl">📊</span>
                     </div>
                 </div>
-                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">No expenses found</p>
-                <p className="text-sm mt-2 text-gray-500 dark:text-gray-400">Add your first expense to get started</p>
+                <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">No expenses found</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Add your first expense to get started</p>
             </div>
         )
     }
 
     return (
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#242526] overflow-hidden shadow-lg animate-fade-in">
-            <Table>
-                <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id} className="bg-gray-50 dark:bg-[#3A3B3C] hover:bg-gray-50 dark:hover:bg-[#3A3B3C] border-b border-gray-200 dark:border-gray-800">
-                            {headerGroup.headers.map((header) => (
-                                <TableHead key={header.id} className="text-gray-900 dark:text-gray-100 font-semibold text-sm h-14">
-                                    {header.isPlaceholder
-                                        ? null
-                                        : flexRender(
-                                            header.column.columnDef.header,
-                                            header.getContext()
-                                        )}
-                                </TableHead>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableHeader>
-                <TableBody>
-                    {table.getRowModel().rows.map((row, index) => (
-                        <TableRow
-                            key={row.id}
-                            className="transition-all duration-200 hover:bg-blue-50/50 dark:hover:bg-blue-950/20 border-b border-gray-100 dark:border-gray-800 last:border-0 group animate-slide-up"
-                            style={{ animationDelay: `${index * 0.05}s` }}
-                        >
-                            {row.getVisibleCells().map((cell) => (
-                                <TableCell key={cell.id} className="py-5 text-sm">
-                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-
-            {/* Pagination info */}
-            <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-[#3A3B3C] text-sm text-gray-600 dark:text-gray-400 font-medium">
-                Showing 1 to {expenses.length} of {expenses.length} expenses
+        <>
+            {/* Table Header */}
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="flex items-center justify-between">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Latest Expenses</h3>
+                    <button className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 font-medium transition-colors">
+                        View All
+                    </button>
+                </div>
             </div>
-        </div>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border-b border-gray-100 dark:border-gray-800">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Date
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Category
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Description
+                            </th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Amount
+                            </th>
+                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+                        {sortedExpenses.map((expense, index) => (
+                            <tr
+                                key={expense.id}
+                                className="group hover:bg-gray-50 dark:hover:bg-[#2A2B2C] transition-colors animate-slide-up"
+                                style={{ animationDelay: `${index * 0.03}s` }}
+                            >
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="text-sm text-gray-900 dark:text-gray-100 font-medium">
+                                        {format(new Date(expense.date), 'dd/MM/yyyy')}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg">{expense.category?.icon || '📝'}</span>
+                                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+                                            {expense.category?.name || 'Uncategorized'}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                    <div className="text-sm text-gray-900 dark:text-gray-100 font-medium">
+                                        {expense.description || '—'}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                    <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                                        {formatCurrency(expense.amount, expense.currency)}
+                                    </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-right">
+                                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => onEdit(expense)}
+                                            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-[#1877F2] dark:hover:bg-blue-950/30 dark:hover:text-blue-400"
+                                        >
+                                            <Pencil className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDelete(expense.id)}
+                                            disabled={deletingId === expense.id}
+                                            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-[#F02849] dark:hover:bg-red-950/30 dark:hover:text-red-400"
+                                        >
+                                            <Trash2 className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 text-sm text-gray-500 dark:text-gray-400">
+                Showing {expenses.length} {expenses.length === 1 ? 'expense' : 'expenses'}
+            </div>
+        </>
     )
 }

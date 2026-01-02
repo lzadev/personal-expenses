@@ -60,7 +60,7 @@ export function ExpenseFilters({ categories, filter, onFilterChange }: ExpenseFi
     const hasActiveFilters = filter.categoryId || filter.search || filter.startDate || filter.endDate
 
     return (
-        <div className="flex flex-col sm:flex-row gap-3 p-4 bg-white dark:bg-[#242526] rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm">
+        <div className="flex flex-col sm:flex-row gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />

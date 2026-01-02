@@ -54,16 +54,23 @@ export function DashboardClient({ initialExpenses, categories }: DashboardClient
                     />
                 </div>
 
-                <ExpenseFilters
-                    categories={categories}
-                    filter={filter}
-                    onFilterChange={setFilter}
-                />
+                {/* Combined Card with Filters and Table */}
+                <div className="bg-white dark:bg-[#242526] rounded-xl overflow-hidden">
+                    {/* Filters Section */}
+                    <div className="p-6 border-b border-gray-100 dark:border-gray-800">
+                        <ExpenseFilters
+                            categories={categories}
+                            filter={filter}
+                            onFilterChange={setFilter}
+                        />
+                    </div>
 
-                <ExpenseTable
-                    expenses={filteredExpenses}
-                    onEdit={setEditingExpense}
-                />
+                    {/* Table Section */}
+                    <ExpenseTable
+                        expenses={filteredExpenses}
+                        onEdit={setEditingExpense}
+                    />
+                </div>
             </div>
         </div>
     )
