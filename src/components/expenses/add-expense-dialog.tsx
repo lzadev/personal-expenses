@@ -112,29 +112,41 @@ export function AddExpenseDialog({
     // Compress image if it's an image file
     let fileToStore = file;
     if (file.type.startsWith('image/')) {
+      console.log('Starting compression for:', file.name, 'Original size:', (file.size / 1024).toFixed(2), 'KB');
       try {
         toast.loading('Compressing image...');
         const options = {
-          maxSizeMB: 0.5, // Max 500KB
+          maxSizeMB: 0.3, // Max 300KB to stay well under 1MB limit
           maxWidthOrHeight: 1200, // Max dimension
           useWebWorker: true,
           fileType: 'image/jpeg', // Convert to JPEG for better compression
         };
+        console.log('Calling imageCompression with options:', options);
         fileToStore = await imageCompression(file, options);
+        console.log('Compression complete! New size:', (fileToStore.size / 1024).toFixed(2), 'KB');
         toast.dismiss();
-        toast.success(`Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(fileToStore.size / 1024 / 1024).toFixed(2)}MB`);
+
+        // Check if still too large
+        if (fileToStore.size > 900 * 1024) { // 900KB safety margin
+          toast.error(`Compressed file still too large: ${(fileToStore.size / 1024).toFixed(0)}KB. Try a smaller image.`);
+          return;
+        }
+
+        toast.success(`Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(fileToStore.size / 1024).toFixed(0)}KB`);
       } catch (error) {
         toast.dismiss();
         console.error('Error compressing image:', error);
-        toast.error('Failed to compress image, using original');
+        toast.error('Failed to compress image');
+        return;
       }
     }
 
+    console.log('Setting selectedFile to:', fileToStore.name, 'Size:', (fileToStore.size / 1024).toFixed(2), 'KB');
     setSelectedFile(fileToStore);
 
     // Create preview for images
-    if (file.type.startsWith('image/')) {
-      const url = URL.createObjectURL(file);
+    if (fileToStore.type.startsWith('image/')) {
+      const url = URL.createObjectURL(fileToStore);
       setPreviewUrl(url);
     } else {
       setPreviewUrl(null);
@@ -158,6 +170,16 @@ export function AddExpenseDialog({
     setLoading(true);
 
     try {
+      // Log file size for debugging
+      // if (selectedFile) {
+      //   console.log('Uploading file:', selectedFile.name, 'Size:', (selectedFile.size / 1024).toFixed(2), 'KB');
+      //   if (selectedFile.size > 1024 * 1024) {
+      //     toast.error(`File too large: ${(selectedFile.size / 1024).toFixed(0)}KB. Must be under 1MB.`);
+      //     setLoading(false);
+      //     return;
+      //   }
+      // }
+
       const dataToSubmit = {
         ...formData,
         attachment: selectedFile || undefined,

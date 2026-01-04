@@ -92,27 +92,23 @@ export function ExpenseStats({ expenses }: ExpenseStatsProps) {
         }
     }, [expenses])
 
-    // Format number in compact form (1K, 1M, etc.)
-    const formatCompactNumber = (num: number) => {
-        if (num >= 1_000_000) {
-            return (num / 1_000_000).toFixed(2) + 'M'
-        }
-        if (num >= 1_000) {
-            return (num / 1_000).toFixed(2) + 'K'
-        }
-        return num.toFixed(2)
+    // Format number with commas and decimals
+    const formatNumber = (num: number) => {
+        return num.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        })
     }
 
-    // Format currency totals for display (shortened for cards)
     const formatCurrencyTotals = (totals: { currency: string; total: number }[], maxDisplay = 1) => {
         if (totals.length === 0) return 'No expenses'
         if (totals.length === 1) {
-            return `${totals[0].currency} ${formatCompactNumber(totals[0].total)}`
+            return `${totals[0].currency} $${formatNumber(totals[0].total)}`
         }
         // Always show DOP if available, otherwise show the first currency
         const dopTotal = totals.find(t => t.currency === 'DOP')
         const displayTotal = dopTotal || totals[0]
-        return `${displayTotal.currency} ${formatCompactNumber(displayTotal.total)}`
+        return `${displayTotal.currency} $${formatNumber(displayTotal.total)}`
     }
 
     const handleViewDetails = (cardType: 'total' | 'monthly' | 'average') => {

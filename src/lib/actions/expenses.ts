@@ -60,7 +60,7 @@ export async function createExpense(formData: ExpenseFormData) {
     }
   }
 
-  const { attachment, ...expenseData } = formData
+  const { attachment, removeAttachment, ...expenseData } = formData
 
   const { error } = await supabase.from('expenses').insert({
     user_id: user.id,
