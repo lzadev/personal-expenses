@@ -37,4 +37,5 @@ export interface ExpenseFormData {
   date: string
   description?: string
   attachment?: File
+  removeAttachment?: boolean
 }

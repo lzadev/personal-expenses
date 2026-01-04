@@ -89,8 +89,19 @@ export async function updateExpense(id: string, formData: ExpenseFormData) {
     .single()
 
   // Handle attachment upload if present
-  let attachmentData = {}
-  if (formData.attachment) {
+  let attachmentData: any = {}
+  
+  // If user wants to remove existing attachment
+  if (formData.removeAttachment && existingExpense?.attachment_url) {
+    await deleteAttachment(existingExpense.attachment_url, supabase)
+    attachmentData = {
+      attachment_url: null,
+      attachment_name: null,
+      attachment_type: null,
+    }
+  }
+  // If user is uploading a new attachment
+  else if (formData.attachment) {
     // Delete old attachment if exists
     if (existingExpense?.attachment_url) {
       await deleteAttachment(existingExpense.attachment_url, supabase)
@@ -104,7 +115,7 @@ export async function updateExpense(id: string, formData: ExpenseFormData) {
     }
   }
 
-  const { attachment, ...expenseData } = formData
+  const { attachment, removeAttachment, ...expenseData } = formData
 
   const { error } = await supabase
     .from('expenses')

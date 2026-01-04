@@ -56,6 +56,7 @@ export function AddExpenseDialog({
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [removeExistingAttachment, setRemoveExistingAttachment] = useState(false);
   const [formData, setFormData] = useState<ExpenseFormData>({
     amount: 0,
     currency: "DOP",
@@ -77,6 +78,7 @@ export function AddExpenseDialog({
       if (editingExpense.attachment_url) {
         setPreviewUrl(editingExpense.attachment_url);
       }
+      setRemoveExistingAttachment(false);
       setOpen(true);
     }
   }, [editingExpense]);
@@ -145,6 +147,10 @@ export function AddExpenseDialog({
       URL.revokeObjectURL(previewUrl);
     }
     setPreviewUrl(null);
+    // If editing and there's an existing attachment, mark it for removal
+    if (editingExpense?.attachment_url) {
+      setRemoveExistingAttachment(true);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -155,6 +161,7 @@ export function AddExpenseDialog({
       const dataToSubmit = {
         ...formData,
         attachment: selectedFile || undefined,
+        removeAttachment: removeExistingAttachment,
       };
 
       if (editingExpense) {
@@ -175,6 +182,7 @@ export function AddExpenseDialog({
       });
       setSelectedFile(null);
       setPreviewUrl(null);
+      setRemoveExistingAttachment(false);
       onClose?.();
     } catch (error) {
       console.error("Failed to save expense:", error);
