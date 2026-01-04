@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon, Plus, Upload, X, FileText, Image as ImageIcon } from "lucide-react";
+import imageCompression from 'browser-image-compression';
 import { toast } from "sonner";
 import {
   Dialog,
@@ -53,6 +54,8 @@ export function AddExpenseDialog({
 }: AddExpenseDialogProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState<ExpenseFormData>({
     amount: 0,
     currency: "DOP",
@@ -70,20 +73,95 @@ export function AddExpenseDialog({
         date: editingExpense.date,
         description: editingExpense.description || "",
       });
+      // Set preview for existing attachment
+      if (editingExpense.attachment_url) {
+        setPreviewUrl(editingExpense.attachment_url);
+      }
       setOpen(true);
     }
   }, [editingExpense]);
+
+  // Clean up preview URL
+  useEffect(() => {
+    return () => {
+      if (previewUrl && previewUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a valid image (JPG, PNG, WEBP) or PDF file');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('File size must be less than 5MB');
+      return;
+    }
+
+    // Compress image if it's an image file
+    let fileToStore = file;
+    if (file.type.startsWith('image/')) {
+      try {
+        toast.loading('Compressing image...');
+        const options = {
+          maxSizeMB: 0.5, // Max 500KB
+          maxWidthOrHeight: 1200, // Max dimension
+          useWebWorker: true,
+          fileType: 'image/jpeg', // Convert to JPEG for better compression
+        };
+        fileToStore = await imageCompression(file, options);
+        toast.dismiss();
+        toast.success(`Image compressed: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(fileToStore.size / 1024 / 1024).toFixed(2)}MB`);
+      } catch (error) {
+        toast.dismiss();
+        console.error('Error compressing image:', error);
+        toast.error('Failed to compress image, using original');
+      }
+    }
+
+    setSelectedFile(fileToStore);
+
+    // Create preview for images
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    } else {
+      setPreviewUrl(null);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (previewUrl && previewUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      const dataToSubmit = {
+        ...formData,
+        attachment: selectedFile || undefined,
+      };
+
       if (editingExpense) {
-        await updateExpense(editingExpense.id, formData);
+        await updateExpense(editingExpense.id, dataToSubmit);
         toast.success("Expense updated successfully!");
       } else {
-        await createExpense(formData);
+        await createExpense(dataToSubmit);
         toast.success("Expense added successfully!");
       }
 
@@ -95,6 +173,8 @@ export function AddExpenseDialog({
         date: format(new Date(), "yyyy-MM-dd"),
         description: "",
       });
+      setSelectedFile(null);
+      setPreviewUrl(null);
       onClose?.();
     } catch (error) {
       console.error("Failed to save expense:", error);
@@ -126,7 +206,7 @@ export function AddExpenseDialog({
           Add Expense
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px] animate-scale-in glass-card border-gray-200 dark:border-gray-700">
+      <DialogContent className="mx-4 sm:max-w-[500px] max-h-[90vh] overflow-y-auto animate-scale-in glass-card border-gray-200 dark:border-gray-700">
         <DialogHeader className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-xl gradient-fb-blue flex items-center justify-center shadow-lg">
@@ -285,6 +365,81 @@ export function AddExpenseDialog({
                 className="h-11 rounded-xl bg-gray-50 dark:bg-[#3A3B3C] border-gray-200 dark:border-gray-700 focus-visible:ring-[#1877F2] transition-all"
               />
             </div>
+
+            {/* Attachment Upload */}
+            <div className="grid gap-2.5">
+              <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                Receipt (optional)
+              </Label>
+
+              {!selectedFile && !previewUrl ? (
+                <label
+                  htmlFor="attachment"
+                  className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer hover:border-[#1877F2] dark:hover:border-[#1877F2] transition-all bg-gray-50 dark:bg-[#3A3B3C]"
+                >
+                  <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                  <span className="text-sm text-gray-500 dark:text-gray-400">
+                    Click to upload or drag and drop
+                  </span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    JPG, PNG, WEBP or PDF (max 5MB)
+                  </span>
+                  <input
+                    id="attachment"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,application/pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                </label>
+              ) : (
+                <div className="relative border-2 border-gray-200 dark:border-gray-700 rounded-xl p-4 bg-gray-50 dark:bg-[#3A3B3C]">
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="absolute top-2 right-2 p-1 rounded-full bg-red-500 hover:bg-red-600 text-white transition-all"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+
+                  {previewUrl && selectedFile?.type.startsWith('image/') ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="max-h-40 rounded-lg object-contain"
+                      />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        {selectedFile.name}
+                      </span>
+                    </div>
+                  ) : previewUrl && !selectedFile ? (
+                    <div className="flex flex-col items-center gap-2">
+                      <img
+                        src={previewUrl}
+                        alt="Existing attachment"
+                        className="max-h-40 rounded-lg object-contain"
+                      />
+                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                        Existing attachment
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-3">
+                      <FileText className="h-10 w-10 text-red-500" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {selectedFile?.name}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          PDF Document
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
           <DialogFooter className="gap-3">
             <Button
@@ -295,8 +450,8 @@ export function AddExpenseDialog({
               {loading
                 ? "Saving..."
                 : editingExpense
-                ? "Update Expense"
-                : "Add Expense"}
+                  ? "Update Expense"
+                  : "Add Expense"}
             </Button>
           </DialogFooter>
         </form>

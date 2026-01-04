@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Pencil, Trash2, ChevronLeft, ChevronRight, FileText } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -150,6 +150,9 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Amount
                             </th>
+                            <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Receipt
+                            </th>
                             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 Actions
                             </th>
@@ -183,6 +186,27 @@ export function ExpenseTable({ expenses, onEdit }: ExpenseTableProps) {
                                     <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                                         {formatCurrency(expense.amount, expense.currency)}
                                     </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-center">
+                                    {expense.attachment_url ? (
+                                        expense.attachment_type?.startsWith('image/') ? (
+                                            <img
+                                                src={expense.attachment_url}
+                                                alt="Receipt"
+                                                className="h-10 w-10 object-cover rounded-lg mx-auto cursor-pointer hover:opacity-80 transition-opacity"
+                                                onClick={() => window.open(expense.attachment_url, '_blank')}
+                                            />
+                                        ) : (
+                                            <button
+                                                onClick={() => window.open(expense.attachment_url, '_blank')}
+                                                className="inline-flex items-center justify-center h-10 w-10 rounded-lg bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                                            >
+                                                <FileText className="h-5 w-5 text-red-600 dark:text-red-400" />
+                                            </button>
+                                        )
+                                    ) : (
+                                        <span className="text-gray-400 dark:text-gray-600">—</span>
+                                    )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right">
                                     <div className="flex items-center justify-end gap-2">

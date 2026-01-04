@@ -15,6 +15,9 @@ export interface Expense {
   category?: Category
   date: string
   description?: string
+  attachment_url?: string
+  attachment_name?: string
+  attachment_type?: string
   created_at: string
   updated_at: string
 }
@@ -33,4 +36,5 @@ export interface ExpenseFormData {
   category_id: string
   date: string
   description?: string
+  attachment?: File
 }
